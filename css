@@ -1,0 +1,210 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Registration Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #00ffcc; /* cyan green background */ 
+            color: #000; /* Black text */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* Full viewport height */
+        }
+        .calculator {
+            width: 33vw; /* 1/3 of the viewport width */
+            height: 50vh; /* 1/2 of the viewport height */
+            max-width: 600px;
+            max-height: 600px; /* Prevents it from getting too large on very big screens */
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff; /* White background for the dialog box */
+            overflow: auto; /* Ensures content doesn't overflow */
+            box-sizing: border-box;
+        }
+        .calculator h2 {
+            margin-top: 0;
+        }
+        .calculator section {
+            margin-bottom: 20px;
+        }
+        .calculator input, .calculator select, .calculator button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            box-sizing: border-box;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h2>Event Registration Calculator</h2>
+
+        <!-- Section 1: Nationality -->
+        <section id="nationalitySection">
+            <label for="nationality">Nationality:</label>
+            <select id="nationality" onchange="handleNationalityChange()">
+                <option value="">Select</option>
+                <option value="indian">Indian</option>
+                <option value="foreign">Foreign</option>
+            </select>
+        </section>
+
+        <!-- Section 2: Registration Type -->
+        <section id="registrationType">
+            <label for="regType">Registering for:</label>
+            <select id="regType" onchange="handleRegistrationTypeChange()">
+                <option value="">Select</option>
+                <option value="self">Myself</option>
+                <option value="group">Group</option>
+            </select>
+        </section>
+
+        <!-- Section 3: Number of People (Visible only if Group is selected) -->
+        <section id="numberOfPeople" class="hidden">
+            <label for="peopleCount">Number of people:</label>
+            <input type="number" id="peopleCount" min="2" step="1" placeholder="Enter number of people">
+        </section>
+
+        <!-- Section 4: Event Day -->
+        <section id="eventDay">
+            <label for="eventDaySelect">Event Day:</label>
+            <select id="eventDaySelect" onchange="handleEventDayChange()">
+                <option value="">Select</option>
+                <option value="online">27 Nov 2024 - Online</option>
+                <option value="offline">28 Nov 2024 - Offline</option>
+                <option value="both">Both</option>
+            </select>
+        </section>
+
+        <!-- Section 5: Category (Visible only if Offline event is selected) -->
+        <section id="categorySection" class="hidden">
+            <label for="categorySelect">Category:</label>
+            <select id="categorySelect">
+                <option value="">Select</option>
+                <option value="student">Student</option>
+                <option value="academic">Academic/Professor/CBO/NPO</option>
+                <option value="general">General</option>
+            </select>
+        </section>
+
+        <button onclick="calculateTotal()">Calculate Total</button>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        function handleNationalityChange() {
+            const nationality = document.getElementById('nationality').value;
+            const currencySymbol = nationality === 'foreign' ? '$' : 'Rs ';
+            
+            // Adjust the event day and category sections based on nationality if needed
+            handleEventDayChange();
+        }
+
+        function handleRegistrationTypeChange() {
+            const regType = document.getElementById('regType').value;
+            const numberOfPeopleSection = document.getElementById('numberOfPeople');
+            numberOfPeopleSection.classList.toggle('hidden', regType !== 'group');
+        }
+
+        function handleEventDayChange() {
+            const eventDay = document.getElementById('eventDaySelect').value;
+            const categorySection = document.getElementById('categorySection');
+            categorySection.classList.toggle('hidden', eventDay !== 'offline' && eventDay !== 'both');
+        }
+
+        function calculateTotal() {
+            const nationality = document.getElementById('nationality').value;
+            const regType = document.getElementById('regType').value;
+            const peopleCount = parseInt(document.getElementById('peopleCount').value) || 1;
+            const eventDay = document.getElementById('eventDaySelect').value;
+            const category = document.getElementById('categorySelect').value;
+            
+            let originalPrice = 0;
+            let discount = 0;
+            let currencySymbol = nationality === 'foreign' ? '$' : 'Rs ';
+
+            if (regType === 'self' && eventDay) {
+                if (eventDay === 'online') {
+                    originalPrice = nationality === 'foreign' ? 12 : 300;
+                } else if (eventDay === 'offline') {
+                    if (nationality === 'foreign') {
+                        originalPrice = 135;
+                    } else {
+                        if (category === 'student') {
+                            originalPrice = 1000;
+                        } else if (category === 'academic') {
+                            originalPrice = 2500;
+                        } else if (category === 'general') {
+                            originalPrice = 5000;
+                        }
+                    }
+                } else if (eventDay === 'both') {
+                    if (nationality === 'foreign') {
+                        originalPrice = 135;
+                    } else {
+                        if (category === 'student') {
+                            originalPrice = 1000;
+                        } else if (category === 'academic') {
+                            originalPrice = 2500;
+                        } else if (category === 'general') {
+                            originalPrice = 5000;
+                        }
+                    }
+                }
+            } else if (regType === 'group' && peopleCount > 0) {
+                if (eventDay === 'online') {
+                    originalPrice = peopleCount * (nationality === 'foreign' ? 12 : 300);
+                } else if (eventDay === 'offline') {
+                    if (nationality === 'foreign') {
+                        originalPrice = peopleCount * 135;
+                    } else {
+                        if (category === 'student') {
+                            originalPrice = peopleCount * 1000;
+                        } else if (category === 'academic') {
+                            originalPrice = peopleCount * 2500;
+                        } else if (category === 'general') {
+                            originalPrice = peopleCount * 5000;
+                        }
+                    }
+                } else if (eventDay === 'both') {
+                    if (nationality === 'foreign') {
+                        originalPrice = peopleCount * 135;
+                    } else {
+                        if (category === 'student') {
+                            originalPrice = peopleCount * 1000;
+                        } else if (category === 'academic') {
+                            originalPrice = peopleCount * 2500;
+                        } else if (category === 'general') {
+                            originalPrice = peopleCount * 5000;
+                        }
+                    }
+                }
+                if (peopleCount > 1) {
+                    discount = originalPrice * 0.05;
+                    originalPrice -= discount;
+                }
+            }
+
+            document.getElementById('result').innerHTML = `
+                <p>Original Price: ${currencySymbol}${(originalPrice + discount).toFixed(2)}</p>
+                <p>Total Price (Original Price minus Discount): ${currencySymbol}${originalPrice.toFixed(2)}</p>
+                <p>Discount Applied: ${currencySymbol}${discount.toFixed(2)}</p>
+            `;
+        }
+    </script>
+</body>
+</html>
